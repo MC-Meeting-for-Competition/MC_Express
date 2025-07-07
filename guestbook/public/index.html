@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>방명록</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 기본 초기화 */
+        body {
+            font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #333;
+        }
+
+        /* 제목 */
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+
+        /* 작성 폼 */
+        form {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 15px;
+            background-color: #fafafa;
+            transition: border-color 0.2s ease;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        /* 기본 버튼 스타일 */
+        button {
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* 방명록 항목 카드 */
+        .entry {
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            padding: 18px;
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 500px;
+            transition: background-color 0.2s ease;
+        }
+
+        .entry:hover {
+            background-color: #f9f9f9;
+        }
+
+        /* 본문 텍스트 */
+        .entry-content {
+            margin-top: 8px;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+        }
+
+        /* 버튼들 모음 */
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .actions button {
+            padding: 6px 10px;
+            font-size: 13px;
+            background-color: #eee;
+            color: #333;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        .actions button:hover {
+            background-color: #ddd;
+            color: #000;
+        }
+
+        /* 댓글 목록 */
+        .comments {
+            margin-top: 10px;
+            padding-left: 12px;
+            border-left: 2px solid #eee;
+        }
+
+        .comments p {
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        /* 댓글 작성 폼 */
+        .comment-form {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .comment-form input {
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        .comment-form button {
+            align-self: flex-end;
+            padding: 8px 12px;
+            font-size: 14px;
+            background-color: #28a745;
+            border: none;
+            border-radius: 6px;
+            color: white;
+        }
+
+        .comment-form button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>방명록</h1>
+
+    <form id="write-form">
+        <input type="text" id="name" placeholder="이름" required />
+        <textarea id="content" placeholder="내용" required></textarea>
+        <button type="submit">등록</button>
+    </form>
+
+    <div id="entries"></div>
+
+    <script>
+        const entriesContainer = document.getElementById("entries");
+
+        // 방명록 불러오기
+        async function loadGuestbook() {
+            entriesContainer.innerHTML = "";
+            const res = await fetch("/guestbook");
+            const entries = await res.json();
+
+            entries.forEach(entry => {
+                const div = document.createElement("div");
+                div.className = "entry";
+                div.innerHTML = `
+          <strong>${entry.name}</strong> <small>#${entry.id}</small><br/>
+          <p contenteditable="false" class="entry-content">${entry.content}</p>
+          <div class="actions">
+            <button onclick="likeEntry(${entry.id})">❤️ ${entry.likes}</button>
+            <button onclick="editEntry(${entry.id}, this)">✏️ 수정</button>
+            <button onclick="deleteEntry(${entry.id})">🗑 삭제</button>
+          </div>
+          <div class="comments">
+            <div>${entry.comments.map(c => `<p><strong>${c.name}</strong>: ${c.content}</p>`).join("")}</div>
+            <form onsubmit="addComment(event, ${entry.id})" class="comment-form">
+              <input type="text" placeholder="댓글 작성자" required />
+              <input type="text" placeholder="댓글 내용" required />
+              <button type="submit">댓글</button>
+            </form>
+          </div>
+        `;
+                entriesContainer.appendChild(div);
+            });
+        }
+
+        // 방명록 작성
+        document.getElementById("write-form").addEventListener("submit", async e => {
+            e.preventDefault();
+            const name = document.getElementById("name").value;
+            const content = document.getElementById("content").value;
+
+            await fetch("/write", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({ name, content })
+            });
+
+            document.getElementById("write-form").reset();
+            loadGuestbook();
+        });
+
+        // 좋아요
+        async function likeEntry(id) {
+            await fetch(`/likes/${id}`, { method: "POST" });
+            loadGuestbook();
+        }
+
+        // 글 수정
+        async function editEntry(id, btn) {
+            const entryDiv = btn.closest(".entry");
+            const contentEl = entryDiv.querySelector(".entry-content");
+
+            if (btn.innerText.includes("✏️")) {
+                contentEl.contentEditable = true;
+                contentEl.focus();
+                btn.innerText = "✅ 저장";
+            } else {
+                contentEl.contentEditable = false;
+                btn.innerText = "✏️ 수정";
+                await fetch(`/edit/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ content: contentEl.innerText })
+                });
+                loadGuestbook();
+            }
+        }
+
+        // 글 삭제
+        async function deleteEntry(id) {
+            if (confirm("정말 삭제하시겠습니까?")) {
+                await fetch(`/delete/${id}`, { method: "DELETE" });
+                loadGuestbook();
+            }
+        }
+
+        // 댓글 추가
+        async function addComment(event, id) {
+            event.preventDefault();
+            const form = event.target;
+            const name = form.querySelector("input:nth-child(1)").value;
+            const content = form.querySelector("input:nth-child(2)").value;
+
+            await fetch(`/comment/${id}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, content })
+            });
+
+            loadGuestbook();
+        }
+
+        // 초기 로딩
+        loadGuestbook();
+    </script>
+</body>
+
+</html>
