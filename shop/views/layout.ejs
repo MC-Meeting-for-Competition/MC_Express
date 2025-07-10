@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>🛍️ My Shopping Mall</h1>
+        <nav>
+            <a href="/">홈</a>
+            <a href="/products">상품</a>
+            <a href="/cart">장바구니</a>
+            <% if (user) { %>
+                <span><%= user.username %>님</span>
+                <a href="/logout">로그아웃</a>
+                <% if (user.isAdmin) { %>
+                    <a href="/admin">관리자</a>
+                <% } %>
+            <% } else { %>
+                <a href="/login">로그인</a>
+                <a href="/register">회원가입</a>
+            <% } %>
+        </nav>
+    </header>
+    <main>
+        <%- body %>
+    </main>
+    <footer>
+        ⓒ 2025 Shopping Mall. All rights reserved.
+    </footer>
+</body>
+</html>
