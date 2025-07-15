@@ -1,7 +1,9 @@
 import express from "express";
 
-const router = express.Router();
+const adminRouter = express.Router();
 
-router.get("/", (request, response) => {
+adminRouter.get("/", (request, response) => {
     
 })
+
+export default adminRouter;

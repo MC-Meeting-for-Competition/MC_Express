@@ -1,11 +1,17 @@
 {
   "dependencies": {
+    "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.0",
     "ejs": "^3.1.10",
     "ejs-locals": "^1.0.2",
     "express": "^5.1.0",
     "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.18.1",
     "mongodb": "^6.17.0",
-    "mongoose": "^8.16.2"
+    "mongoose": "^8.16.2",
+    "nodemon": "^3.1.10"
+  },
+  "scripts": {
+    "start": "nodemon server.js"
   }
 }

@@ -11,7 +11,7 @@
             </tr>
         </thead>
         <tbody>
-            <% cart.forEach(item => { %>
+        <% cart.forEach(item => { %>
                 <tr>
                     <td><%= item.name %></td>
                     <td><%= item.price %>원</td>
@@ -23,7 +23,7 @@
                         </form>
                     </td>
                 </tr>
-            <% }) %>
+        <% }) %>
         </tbody>
     </table>
     <p>총합계: <%= totalPrice %>원</p>
