@@ -10,19 +10,16 @@ const userSchema = new Schema({
         minlength: 3,
         maxlength: 20,
     },
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true
-    },
-    name: {
-        type: String,
-        required: false
-    },
     password: {
         type: String,
         required: true
+    },
+    gender: {
+        type: String,
+        enum: ["M", "F"]
+    },
+    birth: {
+        type: Date,
     },
     cart: [
         {
