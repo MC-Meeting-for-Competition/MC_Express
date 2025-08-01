@@ -25,7 +25,7 @@ const userSchema = new Schema({
         {
             item: {
                 type: Schema.Types.ObjectId,
-                ref: "Item",
+                ref: "items",
                 required: true
             },
             quantity: {
@@ -43,4 +43,4 @@ const userSchema = new Schema({
     }
 }, { timestamps: true });
 
-export default mongoose.model("User", userSchema);
+export default mongoose.model("users", userSchema);

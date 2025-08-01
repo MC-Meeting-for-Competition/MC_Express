@@ -99,7 +99,13 @@ adminRouter.route("/")
 adminRouter.get("/api/users", async (req, res) => {
     try {
         const users = await User.find({});
-        res.json(users);
+        const userList = users.map((user, idx) => {
+            return {
+                ...user,
+                password: null
+            }
+        })
+        res.json(userList);
     } catch (error) {
         res.status(500).json({ message: "서버 오류" });
     }
